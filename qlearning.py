@@ -1,5 +1,6 @@
 import gym
 import numpy as np
+import matplotlib.pyplot as plt
 
 env = gym.make("MountainCar-v0")
 
@@ -7,10 +8,10 @@ env = gym.make("MountainCar-v0")
 
 LEARNING_RATE = 0.1
 DISCOUNT = 0.95
-EPISODES = 25_000
-SHOW_EVERY = 2000
+EPISODES = 10_000
+SHOW_EVERY = 500
 
-epsilon = 0.1
+epsilon = 0.2
 START_EPSILON_DECAYING = 1
 END_EPSILON_DECAYING = EPISODES // 2
 epsilon_decay_value = epsilon / (END_EPSILON_DECAYING - START_EPSILON_DECAYING)
@@ -25,13 +26,19 @@ print(discrete_obs_win_size)
 q_table = np.random.uniform(low=-2, high=0, size=(DISCRETE_OBS_SIZE + [env.action_space.n]))
 print(q_table.shape)
 
+ep_rewards = []
+
+agg_ep_rewards = {'ep':[], 'avg':[], 'min':[], 'max':[]}
+
 def get_discrete_state(state, env):
     discrete_state = (state - env.observation_space.low) / discrete_obs_win_size
     return tuple(discrete_state.astype(np.int))
 
 
 for episode in range(EPISODES):
-    
+    #cumulative reward per episode
+    episode_reward = 0
+
     if episode % SHOW_EVERY == 0:
         print(episode)
         render = True
@@ -50,6 +57,9 @@ for episode in range(EPISODES):
             action = np.random.randint(low=0, high=env.action_space.n)
 
         new_state, reward, done, _ = env.step(action)
+        #track the cumulative reward for the episode
+        episode_reward += reward
+
         new_discrete_state = get_discrete_state(new_state, env)
         if render:
             env.render()
@@ -77,7 +87,26 @@ for episode in range(EPISODES):
         discrete_state = new_discrete_state
 
     if END_EPSILON_DECAYING > episode > START_EPSILON_DECAYING:
-        episode -= epsilon_decay_value
-    
+        epsilon -= epsilon_decay_value
 
-env.close()
+    ep_rewards.append(episode_reward)
+
+    if not episode % SHOW_EVERY:
+        average_reward = sum(ep_rewards[-SHOW_EVERY:]) / len(ep_rewards[-SHOW_EVERY:])
+        agg_ep_rewards['ep'].append(episode)
+        agg_ep_rewards['avg'].append(average_reward)
+        agg_ep_rewards['min'].append(min(ep_rewards[-SHOW_EVERY:]))
+        agg_ep_rewards['max'].append(max(ep_rewards[-SHOW_EVERY:]))
+
+        print("ep: {0}, avg {1}, min {2}, max {3}".format(episode, 
+                                                            average_reward,
+                                                            min(ep_rewards[-SHOW_EVERY:]),
+                                                            max(ep_rewards[-SHOW_EVERY:])
+                                                            ))
+
+
+plt.plot(agg_ep_rewards['ep'], agg_ep_rewards['avg'], label='Average Reward')
+plt.plot(agg_ep_rewards['ep'], agg_ep_rewards['min'], label='Min Reward')
+plt.plot(agg_ep_rewards['ep'], agg_ep_rewards['max'], label='Max Reward')
+plt.legend(loc=4)
+plt.show()
