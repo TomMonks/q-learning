@@ -108,5 +108,5 @@ for episode in range(EPISODES):
 plt.plot(agg_ep_rewards['ep'], agg_ep_rewards['avg'], label='Average Reward')
 plt.plot(agg_ep_rewards['ep'], agg_ep_rewards['min'], label='Min Reward')
 plt.plot(agg_ep_rewards['ep'], agg_ep_rewards['max'], label='Max Reward')
-plt.legend(loc=4)
+plt.legend(loc=1)
 plt.show()

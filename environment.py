@@ -19,13 +19,13 @@ HM_EPISODES = 35_000
 MOVE_PENALTY = 1
 ENEMY_PENALTY = 300
 FOOD_REWARD = 25
-epsilon = 0.9
+epsilon = 0
 EPS_DECAY = 0.9998
 SHOW_EVERY = 3000
 
 EPISODE_STEPS = 800
 
-start_q_table = None # or filename...
+start_q_table = 'q_table-1577741550.pickle' #None # or filename...
 
 LEARNING_RATE = 0.1
 DISCOUNT = 0.95
